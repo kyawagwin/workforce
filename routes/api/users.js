@@ -52,4 +52,29 @@ router.post('/register', (req, res) => {
   });
 });
 
+router.post('/login', (req, res) => {
+  const email = req.body.email;
+  const password = req.body.password;
+
+  User.findOne({ email }).then(user => {
+    if(!user) {
+      return res.status(404).json({ message: 'User not found.' });
+    }
+
+    bcrypt.compare(password, user.password).then(isMatch => {
+      if(!isMatch) {
+        return res.status(400).json({ message: 'Password incorrect.' });
+      }
+
+      return res.status(200).json({ message: 'Successfully login.' });
+    }).catch(err => {
+      console.log(err);
+      return res.status(500).json({ message: 'Password compare issue.' });
+    });
+  }).catch(err => {
+    console.log(err);
+    return res.status(500).json({ message: 'Find user by email error.' });
+  });
+});
+
 module.exports = router;
