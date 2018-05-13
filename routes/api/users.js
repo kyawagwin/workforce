@@ -1,8 +1,10 @@
 const express = require('express');
 const gravatar = require('gravatar');
 const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 
 const User = require('../../models/User');
+const keys = require('../../config/keys');
 
 const router = express.Router();
 
@@ -66,7 +68,19 @@ router.post('/login', (req, res) => {
         return res.status(400).json({ message: 'Password incorrect.' });
       }
 
-      return res.status(200).json({ message: 'Successfully login.' });
+      const payload = { id: user.id, name: user.name, avatar: user.avatar };
+
+      jwt.sign(payload, keys.secret, { expiresIn: 3600 }, (err, token) => {
+        if(err) {
+          return res.status(500).json({ message: 'jsonwebtoken sign error.' });
+        }
+
+        return res.status(200).json({
+          message: 'successful',
+          token: `Bearer ${token}`
+        });
+      })
+      //return res.status(200).json({ message: 'Successfully login.' });
     }).catch(err => {
       console.log(err);
       return res.status(500).json({ message: 'Password compare issue.' });
