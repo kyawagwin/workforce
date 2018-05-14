@@ -6,12 +6,23 @@ const passport = require('passport');
 
 const User = require('../../models/User');
 const keys = require('../../config/keys');
+const validateRegisterInput = require('../../validators/register');
 
 const router = express.Router();
 
 router.get('/', (req, res) => res.json({ message: 'Users works!' }));
 
 router.post('/register', (req, res) => {
+  const { errors, isValid } = validateRegisterInput(req.body);
+
+  if(!isValid) {
+    return res.status(400).json({
+      errors,
+      message: 'Register error'
+    });
+  }
+
+
   User.findOne({ email: req.body.email }).then((user) => {
     if(user) {
       console.log(err);
